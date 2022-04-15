@@ -3,7 +3,7 @@ const WebSocket = require('ws');
 const config = require('./config');
 const ethers = require('ethers');
 const PORT = 8777;
-const server = new WebSocket.Server({port: PORT});
+const server = new WebSocket.Server({ port: PORT });
 
 console.log(`Server started on port ${PORT}`);
 server.on('connection', socket => {
@@ -38,7 +38,7 @@ function listingListener(dex, socket) {
       break;
     case 'quickswap':
       provider =
-          new ethers.providers.WebSocketProvider(process.env.POLYGON_NODE);
+        new ethers.providers.WebSocketProvider(process.env.POLYGON_NODE);
       v2FactoryAddress = '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32';
       abi = config.QS_V2_FAC_ABI;
       listingText = 'QUICKSWAP LISTING: ';
@@ -50,37 +50,37 @@ function listingListener(dex, socket) {
   const contract = new ethers.Contract(v2FactoryAddress, abi, provider);
 
   contract.on(
-      'PairCreated',
-      async (tokenAddress0, tokenAddress1, pair, listingNumber) => {
-        const tokenContract0 = new ethers.Contract(
-            tokenAddress0, config.GENERIC_ERC20_ABI, provider);
-        const tokenContract1 = new ethers.Contract(
-            tokenAddress1, config.GENERIC_ERC20_ABI, provider);
-        const [name0, name1] =
-            await Promise.all([tokenContract0.name(), tokenContract1.name()]);
+    'PairCreated',
+    async (tokenAddress0, tokenAddress1, pair, listingNumber) => {
+      const tokenContract0 = new ethers.Contract(
+        tokenAddress0, config.GENERIC_ERC20_ABI, provider);
+      const tokenContract1 = new ethers.Contract(
+        tokenAddress1, config.GENERIC_ERC20_ABI, provider);
+      const [name0, name1] =
+        await Promise.all([tokenContract0.name(), tokenContract1.name()]);
 
-        const date = new Date().toISOString().split('.')[0];
-        console.log(
-            date, listingText, tokenAddress0, tokenAddress1, pair,
-            '(' + name0 + ' - ' + name1 + ')');
-        console.log('\n');
+      const date = new Date().toISOString().split('.')[0];
+      console.log(
+        date, listingText, tokenAddress0, tokenAddress1, pair,
+        '(' + name0 + ' - ' + name1 + ')');
+      console.log('\n');
 
-        const listing = {
-          date,
-          dex,
-          token0: {
-            contract: tokenAddress0,
-            name: name0,
-          },
-          token1: {
-            contract: tokenAddress1,
-            name: name1,
-          },
-          pair,
-        };
+      const listing = {
+        date,
+        dex,
+        token0: {
+          contract: tokenAddress0,
+          name: name0,
+        },
+        token1: {
+          contract: tokenAddress1,
+          name: name1,
+        },
+        pair,
+      };
 
-        socket.send(JSON.stringify(listing));
-      });
+      socket.send(JSON.stringify(listing));
+    });
 }
 
 function initListeners(socket) {
