@@ -7,7 +7,7 @@ const server = new WebSocket.Server({ port: PORT });
 
 console.log(`Server started on port ${PORT}`);
 server.on('connection', socket => {
-  console.log(`${socket.id} connected!`);
+  console.log('Client connected!');
   socket.send(`Connected!`);
 
   initListeners(socket);
