@@ -16,6 +16,11 @@ const DEX = {
     abi: config.CAKE_V2_FAC_ABI,
     node: process.env.BSC_NODE,
   },
+  apeswap: {
+    contract: "0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6",
+    abi: config.APESWAP_FAC_ABI,
+    node: process.env.BSC_NODE,
+  },
   quickswap: {
     contract: "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32",
     abi: config.QS_V2_FAC_ABI,
@@ -42,7 +47,7 @@ server.on("connection", (socket) => {
   socket.on("message", (msg) => {
     const parsed = msg.toString();
     console.log(`message received ${parsed}`);
-    if (parsed === 'token') {
+    if (parsed === "token") {
       testListing(socket);
     } else if (parsed === "err") {
       throw new Error("Custom throw!");
@@ -119,24 +124,25 @@ function initListeners() {
   listingListener("pancake");
   listingListener("quickswap");
   listingListener("trader_joe");
+  listingListener("apeswap");
 }
 
 function testListing(socket) {
-  console.log('Test listing triggered');
+  console.log("Test listing triggered");
   const date = new Date().toISOString().split(".")[0];
-  const dexId = 'test_dex';
+  const dexId = "test_dex";
   const listing = {
     date,
     dexId,
     token0: {
-      contract: '0xtester1',
-      name: 'token1',
+      contract: "0xtester1",
+      name: "token1",
     },
     token1: {
-      contract: '0xtester2',
-      name: 'token2',
+      contract: "0xtester2",
+      name: "token2",
     },
-    pair: '0xpair',
+    pair: "0xpair",
   };
 
   connections.forEach((socket) => socket.send(JSON.stringify(listing)));
