@@ -100,7 +100,7 @@ function listingListener(dexId) {
       console.log("\n");
 
       const listing = {
-        date,
+        timestamp: Date.now(),
         dexId,
         token0: {
           contract: tokenAddress0,
@@ -129,10 +129,9 @@ function initListeners() {
 
 function testListing(socket) {
   console.log("Test listing triggered");
-  const date = new Date().toISOString().split(".")[0];
   const dexId = "test_dex";
   const listing = {
-    date,
+    timestamp: Date.now(),
     dexId,
     token0: {
       contract: "0xtester1",
