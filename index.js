@@ -28,8 +28,18 @@ const DEX = {
   },
   trader_joe: {
     contract: "0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10",
-    abi: config.JOE_V2_FAC,
+    abi: config.JOE_V2_FAC_ABI,
     node: process.env.AVAX_NODE,
+  },
+  spiritswap: {
+    contract: "0xEF45d134b73241eDa7703fa787148D9C9F4950b0",
+    abi: config.SPIRIT_FAC_ABI,
+    node: process.env.FANTOM_NODE,
+  },
+  spookyswap: {
+    contract: "0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3",
+    abi: config.SPOOKY_FAC_ABI,
+    node: process.env.FANTOM_NODE,
   },
 };
 
@@ -125,6 +135,8 @@ function initListeners() {
   listingListener("quickswap");
   listingListener("trader_joe");
   listingListener("apeswap");
+  listingListener("spookyswap");
+  listingListener("spiritswap");
 }
 
 function testListing(socket) {
