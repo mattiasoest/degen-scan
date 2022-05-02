@@ -11,6 +11,11 @@ const DEX = {
     abi: config.UNI_V2_FAC_ABI,
     node: process.env.ETH_NODE,
   },
+  sushiswap_eth: {
+    contract: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
+    abi: config.SUSHI_V2_FAC_ABI,
+    node: process.env.ETH_NODE,
+  },
   pancake: {
     contract: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
     abi: config.CAKE_V2_FAC_ABI,
@@ -131,6 +136,7 @@ function listingListener(dexId) {
 function initListeners() {
   console.log("Scanning for token listings...");
   listingListener("uniswap");
+  listingListener("sushiswap_eth");
   listingListener("pancake");
   listingListener("quickswap");
   listingListener("trader_joe");
