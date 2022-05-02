@@ -1,72 +1,10 @@
 require("dotenv").config();
 const WebSocket = require("ws");
-const config = require("./abis");
+const abis = require("./abis");
 const ethers = require("ethers");
+const { dex } = require("./config");
 const PORT = 4000;
 const server = new WebSocket.Server({ port: PORT });
-
-const DEX = {
-  uniswap: {
-    contract: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
-    abi: config.UNI_V2_FAC_ABI,
-    node: process.env.ETH_NODE,
-  },
-  sushiswap_eth: {
-    contract: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
-    abi: config.SUSHI_V2_FAC_ABI,
-    node: process.env.ETH_NODE,
-  },
-  sushiswap_arb: {
-    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
-    abi: config.SUSHI_V2_FAC_ABI,
-    node: process.env.ARBITRUM_NODE,
-  },
-  sushiswap_poly: {
-    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
-    abi: config.SUSHI_V2_FAC_ABI,
-    node: process.env.POLYGON_NODE,
-  },
-  sushiswap_ftm: {
-    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
-    abi: config.SUSHI_V2_FAC_ABI,
-    node: process.env.FANTOM_NODE,
-  },
-  sushiswap_bsc: {
-    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
-    abi: config.SUSHI_V2_FAC_ABI,
-    node: process.env.BSC_NODE,
-  },
-  pancake: {
-    contract: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
-    abi: config.CAKE_V2_FAC_ABI,
-    node: process.env.BSC_NODE,
-  },
-  apeswap: {
-    contract: "0x0841BD0B734E4F5853f0dD8d7Ea041c241fb0Da6",
-    abi: config.APESWAP_FAC_ABI,
-    node: process.env.BSC_NODE,
-  },
-  quickswap: {
-    contract: "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32",
-    abi: config.QS_V2_FAC_ABI,
-    node: process.env.POLYGON_NODE,
-  },
-  trader_joe: {
-    contract: "0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10",
-    abi: config.JOE_V2_FAC_ABI,
-    node: process.env.AVAX_NODE,
-  },
-  spiritswap: {
-    contract: "0xEF45d134b73241eDa7703fa787148D9C9F4950b0",
-    abi: config.SPIRIT_FAC_ABI,
-    node: process.env.FANTOM_NODE,
-  },
-  spookyswap: {
-    contract: "0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3",
-    abi: config.SPOOKY_FAC_ABI,
-    node: process.env.FANTOM_NODE,
-  },
-};
 
 const connections = [];
 
@@ -77,7 +15,6 @@ server.on("connection", (socket) => {
   console.log("Client connected!");
   connections.push(socket);
   console.log(`${connections.length} connections`);
-
 
   socket.on("message", (msg) => {
     const parsed = msg.toString();
@@ -91,7 +28,7 @@ server.on("connection", (socket) => {
 });
 
 function listingListener(dexId) {
-  const dexData = DEX[dexId];
+  const dexData = dex[dexId];
   const provider = new ethers.providers.WebSocketProvider(dexData.node);
   const v2FactoryAddress = dexData.contract;
   const abi = dexData.abi;
@@ -104,12 +41,12 @@ function listingListener(dexId) {
     async (tokenAddress0, tokenAddress1, pair, listingNumber) => {
       const tokenContract0 = new ethers.Contract(
         tokenAddress0,
-        config.GENERIC_ERC20_ABI,
+        abis.GENERIC_ERC20_ABI,
         provider
       );
       const tokenContract1 = new ethers.Contract(
         tokenAddress1,
-        config.GENERIC_ERC20_ABI,
+        abis.GENERIC_ERC20_ABI,
         provider
       );
 
