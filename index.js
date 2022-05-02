@@ -74,6 +74,7 @@ function listingListener(dexId) {
       const listing = {
         timestamp: Date.now(),
         dexId,
+        network: dex[dexId].network,
         token0: {
           contract: tokenAddress0,
           name: name0,
@@ -112,6 +113,7 @@ function testListing() {
   const listing = {
     timestamp: Date.now(),
     dexId,
+    network: "eth",
     token0: {
       contract: "0xtester1",
       name: "token1",
