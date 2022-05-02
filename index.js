@@ -1,6 +1,6 @@
 require("dotenv").config();
 const WebSocket = require("ws");
-const config = require("./config");
+const config = require("./abis");
 const ethers = require("ethers");
 const PORT = 4000;
 const server = new WebSocket.Server({ port: PORT });
@@ -15,6 +15,26 @@ const DEX = {
     contract: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
     abi: config.SUSHI_V2_FAC_ABI,
     node: process.env.ETH_NODE,
+  },
+  sushiswap_arb: {
+    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
+    abi: config.SUSHI_V2_FAC_ABI,
+    node: process.env.ARBITRUM_NODE,
+  },
+  sushiswap_poly: {
+    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
+    abi: config.SUSHI_V2_FAC_ABI,
+    node: process.env.POLYGON_NODE,
+  },
+  sushiswap_ftm: {
+    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
+    abi: config.SUSHI_V2_FAC_ABI,
+    node: process.env.FANTOM_NODE,
+  },
+  sushiswap_bsc: {
+    contract: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
+    abi: config.SUSHI_V2_FAC_ABI,
+    node: process.env.BSC_NODE,
   },
   pancake: {
     contract: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
@@ -137,6 +157,10 @@ function initListeners() {
   console.log("Scanning for token listings...");
   listingListener("uniswap");
   listingListener("sushiswap_eth");
+  listingListener("sushiswap_arb");
+  listingListener("sushiswap_poly");
+  listingListener("sushiswap_ftm");
+  listingListener("sushiswap_bsc");
   listingListener("pancake");
   listingListener("quickswap");
   listingListener("trader_joe");
@@ -145,7 +169,7 @@ function initListeners() {
   listingListener("spiritswap");
 }
 
-function testListing(socket) {
+function testListing() {
   console.log("Test listing triggered");
   const dexId = "test_dex";
   const listing = {
