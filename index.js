@@ -4,6 +4,7 @@ const abis = require("./abis");
 const ethers = require("ethers");
 const { dex } = require("./config");
 const PORT = 4000;
+const PING_TIME = 25000;
 const server = new WebSocket.Server({ port: PORT });
 
 const connections = [];
@@ -12,19 +13,32 @@ initListeners();
 console.log(`Server started on port ${PORT}`);
 
 server.on("connection", (socket) => {
-  console.log("Client connected!");
   connections.push(socket);
-  console.log(`${connections.length} connections`);
-
+  console.log(`Client connected! Now ${connections.length} connections`);
+  let lastMsg = Date.now();
   socket.on("message", (msg) => {
     const parsed = msg.toString();
-    console.log(`message received ${parsed}`);
-    if (parsed === "token") {
-      testListing(socket);
-    } else if (parsed === "err") {
-      throw new Error("Custom throw!");
+    if (parsed === "ping") {
+      lastMsg = Date.now();
     }
   });
+
+  // Connection handling, cleanup if the closed the app
+  const id = setInterval(() => {
+    if (Date.now() - lastMsg > PING_TIME) {
+      for (var i = 0; i < connections.length; i++) {
+        if (connections[i] === socket) {
+          connections.splice(i, 1);
+          const date = new Date().toISOString().split(".")[0];
+          console.log(
+            `${date} Removed socket, now ${connections.length} connections`
+          );
+          clearInterval(id);
+          socket.close();
+        }
+      }
+    }
+  }, PING_TIME);
 });
 
 function listingListener(dexId) {
@@ -69,7 +83,6 @@ function listingListener(dexId) {
         pair,
         "(" + name0 + " - " + name1 + ")"
       );
-      console.log("\n");
 
       const listing = {
         timestamp: Date.now(),
