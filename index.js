@@ -9,7 +9,7 @@ const server = new WebSocket.Server({ port: PORT });
 
 const connections = [];
 
-const RECENT_CAP = 12;
+const RECENT_CAP = 18;
 const recentListings = [];
 
 initListeners();
