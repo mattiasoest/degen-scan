@@ -4,7 +4,8 @@ const abis = require("./abis");
 const ethers = require("ethers");
 const { dex } = require("./config");
 const PORT = 4000;
-const PING_TIME = 25000;
+// const PING_TIME = 25000;
+const PING_TIME = 1000 * 60 * 60 * 5; // FIX LATER
 const server = new WebSocket.Server({ port: PORT });
 
 const connections = [];
@@ -20,7 +21,6 @@ server.on("connection", (socket) => {
   socket.on("message", (msg) => {
     const parsed = msg.toString();
     if (parsed === "ping") {
-      console.log(`${date} PING!`);
       lastMsg = Date.now();
     }
   });
