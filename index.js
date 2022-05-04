@@ -14,11 +14,13 @@ console.log(`Server started on port ${PORT}`);
 
 server.on("connection", (socket) => {
   connections.push(socket);
-  console.log(`Client connected! Now ${connections.length} connections`);
+  const date = new Date().toISOString().split(".")[0];
+  console.log(`${date} Client connected! Now ${connections.length} connections`);
   let lastMsg = Date.now();
   socket.on("message", (msg) => {
     const parsed = msg.toString();
     if (parsed === "ping") {
+      console.log(`${date} PING!`);
       lastMsg = Date.now();
     }
   });
