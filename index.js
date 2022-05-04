@@ -10,6 +10,9 @@ const server = new WebSocket.Server({ port: PORT });
 
 const connections = [];
 
+const RECENT_CAP = 12;
+const recentListings = [];
+
 initListeners();
 console.log(`Server started on port ${PORT}`);
 
@@ -17,6 +20,7 @@ server.on("connection", (socket) => {
   connections.push(socket);
   const date = new Date().toISOString().split(".")[0];
   console.log(`${date} Client connected! Now ${connections.length} connections`);
+  socket.send(JSON.stringify(recentListings));
   let lastMsg = Date.now();
   socket.on("message", (msg) => {
     const parsed = msg.toString();
@@ -100,6 +104,12 @@ function listingListener(dexId) {
         },
         pair,
       };
+
+      // TODO STORE IN DB?
+      recentListings.unshift(listing);
+      if (recentListings.size > RECENT_CAP) {
+        recentListings.pop();
+      }
 
       connections.forEach((socket) => socket.send(JSON.stringify(listing)));
     }
