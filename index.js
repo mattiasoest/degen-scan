@@ -105,7 +105,7 @@ function listingListener(dexId) {
 
       // TODO STORE IN DB?
       recentListings.unshift(listing);
-      if (recentListings.size > RECENT_CAP) {
+      if (recentListings.length > RECENT_CAP) {
         recentListings.pop();
       }
 
