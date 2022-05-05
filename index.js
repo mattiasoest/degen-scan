@@ -9,7 +9,7 @@ const server = new WebSocket.Server({ port: PORT });
 
 const connections = [];
 
-const RECENT_CAP = 18;
+const RECENT_CAP = 16;
 const recentListings = [];
 
 initListeners();
@@ -105,7 +105,7 @@ function listingListener(dexId) {
 
       // TODO STORE IN DB?
       recentListings.unshift(listing);
-      while (recentListings.size > RECENT_CAP) {
+      if (recentListings.length > RECENT_CAP) {
         recentListings.pop();
       }
 
