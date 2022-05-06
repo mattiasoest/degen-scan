@@ -4,7 +4,8 @@ const abis = require("./abis");
 const ethers = require("ethers");
 const { dex } = require("./config");
 const PORT = 4000;
-const PING_TIME = 25000;
+const PING_PONG = 1000;
+const PING_INTERVAL = 25000;
 const server = new WebSocket.Server({ port: PORT });
 
 const connections = [];
@@ -16,33 +17,44 @@ initListeners();
 console.log(`Server started on port ${PORT}`);
 
 server.on("connection", (socket) => {
+  let pong = false;
+
   connections.push(socket);
   socket.send(JSON.stringify(recentListings));
   console.log(`Client connected! Now ${connections.length} connections`);
-  let lastMsg = Date.now();
   socket.on("message", (msg) => {
     const parsed = msg.toString();
-    if (parsed === "ping") {
+    if (parsed === "pong") {
+      console.log(`PONG`);
+      pong = true;
       lastMsg = Date.now();
     }
   });
 
-  // Connection handling, cleanup if the closed the app
-  const id = setInterval(() => {
-    if (Date.now() - lastMsg > PING_TIME) {
-      for (var i = 0; i < connections.length; i++) {
-        if (connections[i] === socket) {
-          connections.splice(i, 1);
-          const date = new Date().toISOString().split(".")[0];
-          console.log(
-            `${date} Removed socket, now ${connections.length} connections`
-          );
-          clearInterval(id);
-          socket.close();
+  // Connection handling, cleanup if app is closed
+  const intervalID = setInterval(() => {
+    socket.send("ping");
+    const timeoutID = setTimeout(() => {
+      if (!pong) {
+        for (let i = 0; i < connections.length; i++) {
+          if (connections[i] === socket) {
+            connections.splice(i, 1);
+            const date = new Date().toISOString().split(".")[0];
+            console.log(
+              `${date} Removed socket, now ${connections.length} connections`
+            );
+            // Cleanup
+            clearInterval(intervalID);
+            clearTimeout(timeoutID);
+            socket.close();
+          }
         }
+      } else {
+        // reset
+        pong = false;
       }
-    }
-  }, PING_TIME);
+    }, PING_PONG);
+  }, PING_INTERVAL);
 });
 
 function listingListener(dexId) {
