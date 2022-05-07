@@ -25,7 +25,6 @@ server.on("connection", (socket) => {
   socket.on("message", (msg) => {
     const parsed = msg.toString();
     if (parsed === "pong") {
-      console.log(`PONG`);
       pong = true;
       lastMsg = Date.now();
     }
@@ -57,9 +56,9 @@ server.on("connection", (socket) => {
   }, PING_INTERVAL);
 });
 
-function listingListener(dexId) {
+function listingListener(dexId, provider) {
   const dexData = dex[dexId];
-  const provider = new ethers.providers.WebSocketProvider(dexData.node);
+
   const v2FactoryAddress = dexData.contract;
   const abi = dexData.abi;
   const listingText = `${dexId} LISTING: `;
@@ -128,18 +127,26 @@ function listingListener(dexId) {
 
 function initListeners() {
   console.log("Scanning for token listings...");
-  listingListener("uniswap");
-  listingListener("sushiswap_eth");
-  listingListener("sushiswap_arb");
-  listingListener("sushiswap_poly");
-  listingListener("sushiswap_ftm");
-  listingListener("sushiswap_bsc");
-  listingListener("pancake");
-  listingListener("quickswap");
-  listingListener("trader_joe");
-  listingListener("apeswap");
-  listingListener("spookyswap");
-  listingListener("spiritswap");
+
+  const ethProvider = connectionHandler("eth");
+  const bscProvider = connectionHandler("bsc");
+  const polyProvider = connectionHandler("poly");
+  const avaxProvider = connectionHandler("avax");
+  const ftmProvider = connectionHandler("ftm");
+  const arbitrumProvider = connectionHandler("arbitrum");
+
+  listingListener("uniswap", ethProvider);
+  listingListener("sushiswap_eth", ethProvider);
+  listingListener("sushiswap_arb", arbitrumProvider);
+  listingListener("sushiswap_bsc", bscProvider);
+  listingListener("pancake", bscProvider);
+  listingListener("apeswap", bscProvider);
+  listingListener("quickswap", polyProvider);
+  listingListener("sushiswap_poly", polyProvider);
+  listingListener("trader_joe", avaxProvider);
+  listingListener("spookyswap", ftmProvider);
+  listingListener("spiritswap", ftmProvider);
+  listingListener("sushiswap_ftm", ftmProvider);
 }
 
 function testListing() {
@@ -161,4 +168,49 @@ function testListing() {
   };
 
   connections.forEach((socket) => socket.send(JSON.stringify(listing)));
+}
+
+function connectionHandler(network) {
+  let provider;
+  switch (network) {
+    case "eth":
+      provider = new ethers.providers.WebSocketProvider(process.env.ETH_NODE);
+      break;
+    case "bsc":
+      provider = new ethers.providers.WebSocketProvider(process.env.BSC_NODE);
+      break;
+    case "poly":
+      provider = new ethers.providers.WebSocketProvider(
+        process.env.POLYGON_NODE
+      );
+      break;
+    case "avax":
+      provider = new ethers.providers.WebSocketProvider(process.env.AVAX_NODE);
+      break;
+    case "ftm":
+      provider = new ethers.providers.WebSocketProvider(
+        process.env.FANTOM_NODE
+      );
+      break;
+    case "arbitrum":
+      provider = new ethers.providers.WebSocketProvider(
+        process.env.ARBITRUM_NODE
+      );
+      break;
+    default:
+      throw new Error(`Invalid network: ${network}`);
+  }
+
+  provider._websocket.on("open", () => {
+    const date = new Date().toISOString().split(".")[0];
+    console.log(`${date} ${network} Provider OPEN`);
+  });
+
+  provider._websocket.on("close", () => {
+    const date = new Date().toISOString().split(".")[0];
+    console.log(`${date} ${network} Provider CLOSED`);
+  });
+
+  // TODO handle reconnect if issues
+  return provider;
 }
