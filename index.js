@@ -2,15 +2,20 @@ require("dotenv").config();
 const WebSocket = require("ws");
 const abis = require("./abis");
 const ethers = require("ethers");
-const { dex } = require("./config");
+const { dex, networkDexes } = require("./config");
 const PORT = 4000;
 const PING_PONG = 1000;
 const PING_INTERVAL = 25000;
+const NODE_RECONNECT = 2000;
 const server = new WebSocket.Server({ port: PORT });
+const EventEmitter = require("node:events");
+
+class ConnectionEmitter extends EventEmitter {}
+const connectionEmitter = new ConnectionEmitter();
 
 const connections = [];
 
-const RECENT_CAP = 18;
+const RECENT_CAP = 20;
 const recentListings = [];
 
 initListeners();
@@ -61,7 +66,7 @@ function listingListener(dexId, provider) {
 
   const v2FactoryAddress = dexData.contract;
   const abi = dexData.abi;
-  const listingText = `${dexId} LISTING: `;
+  const listingText = `Listing@${dexId}: `;
 
   const contract = new ethers.Contract(v2FactoryAddress, abi, provider);
 
@@ -87,6 +92,8 @@ function listingListener(dexId, provider) {
         ]);
       } catch (err) {
         console.log("Failed to get token names");
+        name0 = "Unkown1";
+        name1 = "Unkown2";
       }
 
       const date = new Date().toISOString().split(".")[0];
@@ -127,26 +134,38 @@ function listingListener(dexId, provider) {
 
 function initListeners() {
   console.log("Scanning for token listings...");
+  // Init part
+  const providers = {
+    eth: null,
+    bsc: null,
+    poly: null,
+    avax: null,
+    ftm: null,
+    arbitrum: null,
+  };
+  for (net in networkDexes) {
+    for (dexId of networkDexes[net]) {
+      if (!providers[net]) {
+        const provider = createProvider(net);
+        connectionHandler(net, provider);
+        providers[net] = provider;
+      }
+      listingListener(dexId, providers[net]);
+    }
+  }
 
-  const ethProvider = connectionHandler("eth");
-  const bscProvider = connectionHandler("bsc");
-  const polyProvider = connectionHandler("poly");
-  const avaxProvider = connectionHandler("avax");
-  const ftmProvider = connectionHandler("ftm");
-  const arbitrumProvider = connectionHandler("arbitrum");
-
-  listingListener("uniswap", ethProvider);
-  listingListener("sushiswap_eth", ethProvider);
-  listingListener("sushiswap_arb", arbitrumProvider);
-  listingListener("sushiswap_bsc", bscProvider);
-  listingListener("pancake", bscProvider);
-  listingListener("apeswap", bscProvider);
-  listingListener("quickswap", polyProvider);
-  listingListener("sushiswap_poly", polyProvider);
-  listingListener("trader_joe", avaxProvider);
-  listingListener("spookyswap", ftmProvider);
-  listingListener("spiritswap", ftmProvider);
-  listingListener("sushiswap_ftm", ftmProvider);
+  // Recover part
+  connectionEmitter.on("disconnect", (network) => {
+    const date = new Date().toISOString().split(".")[0];
+    console.log(`${date} ${network} WSS 'Disconnect', re-connecting in 2s..`);
+    setTimeout(() => {
+      const provider = createProvider(network);
+      for (dexId of networkDexes[network]) {
+        connectionHandler(network, provider);
+        listingListener(dexId, providers[network]);
+      }
+    }, NODE_RECONNECT);
+  });
 }
 
 function testListing() {
@@ -170,7 +189,20 @@ function testListing() {
   connections.forEach((socket) => socket.send(JSON.stringify(listing)));
 }
 
-function connectionHandler(network) {
+function connectionHandler(network, provider) {
+  provider._websocket.on("open", () => {
+    const date = new Date().toISOString().split(".")[0];
+    console.log(`${date} ${network} WSS OPEN`);
+  });
+
+  provider._websocket.on("close", () => {
+    const date = new Date().toISOString().split(".")[0];
+    console.log(`${date} ${network} WSS CLOSED`);
+    connectionEmitter.emit("disconnect", network);
+  });
+}
+
+function createProvider(network) {
   let provider;
   switch (network) {
     case "eth":
@@ -201,16 +233,5 @@ function connectionHandler(network) {
       throw new Error(`Invalid network: ${network}`);
   }
 
-  provider._websocket.on("open", () => {
-    const date = new Date().toISOString().split(".")[0];
-    console.log(`${date} ${network} Provider OPEN`);
-  });
-
-  provider._websocket.on("close", () => {
-    const date = new Date().toISOString().split(".")[0];
-    console.log(`${date} ${network} Provider CLOSED`);
-  });
-
-  // TODO handle reconnect if issues
   return provider;
 }

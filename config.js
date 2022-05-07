@@ -75,4 +75,16 @@ const dex = {
   },
 };
 
-exports.dex = dex;
+const networkDexes = {
+  eth: ["uniswap", "sushiswap_eth"],
+  arbitrum: ["sushiswap_arb"],
+  bsc: ["sushiswap_bsc", "pancake", "apeswap"],
+  poly: ["quickswap", "sushiswap_poly"],
+  avax: ["trader_joe"],
+  ftm: ["spookyswap", "spiritswap", "sushiswap_ftm"],
+};
+
+module.exports = {
+  dex,
+  networkDexes,
+};
