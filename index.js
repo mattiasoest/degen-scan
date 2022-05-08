@@ -6,7 +6,7 @@ const { dex, networkDexes } = require("./config");
 const PORT = 4000;
 const PING_PONG = 1000;
 const PING_INTERVAL = 25000;
-const NODE_RECONNECT = 30000;
+const NODE_RECONNECT = 10000;
 const server = new WebSocket.Server({ port: PORT });
 const EventEmitter = require("node:events");
 
@@ -162,7 +162,7 @@ function initListeners() {
       const provider = createProvider(network);
       connectionHandler(network, provider);
       for (dexId of networkDexes[network]) {
-        listingListener(dexId, providers[network]);
+        listingListener(dexId, provider);
       }
     }, NODE_RECONNECT);
   });
