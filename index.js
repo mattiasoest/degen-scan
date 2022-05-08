@@ -6,7 +6,7 @@ const { dex, networkDexes } = require("./config");
 const PORT = 4000;
 const PING_PONG = 1000;
 const PING_INTERVAL = 25000;
-const NODE_RECONNECT = 2000;
+const NODE_RECONNECT = 5000;
 const server = new WebSocket.Server({ port: PORT });
 const EventEmitter = require("node:events");
 
@@ -157,11 +157,11 @@ function initListeners() {
   // Recover part
   connectionEmitter.on("disconnect", (network) => {
     const date = new Date().toISOString().split(".")[0];
-    console.log(`${date} ${network} WSS 'Disconnect', re-connecting in 2s..`);
+    console.log(`${date} ${network} WSS 'Disconnect', re-connecting in 5s..`);
     setTimeout(() => {
       const provider = createProvider(network);
+      connectionHandler(network, provider);
       for (dexId of networkDexes[network]) {
-        connectionHandler(network, provider);
         listingListener(dexId, providers[network]);
       }
     }, NODE_RECONNECT);
