@@ -2,7 +2,9 @@
 
 ## Connect with a browser or cli.
 
-Example using wscat for dev. test
+www.degenscan.net
+
+Example using wscat for local dev. test without tls
 
 ```npm install -g wscat```
 
