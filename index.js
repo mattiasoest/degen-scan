@@ -147,6 +147,7 @@ function initListeners() {
     for (dexId of networkDexes[net]) {
       if (!providers[net]) {
         const provider = createProvider(net);
+        if (!provider) continue;
         connectionHandler(net, provider);
         providers[net] = provider;
       }
@@ -211,26 +212,27 @@ function createProvider(network) {
     case "bsc":
       provider = new ethers.providers.WebSocketProvider(process.env.BSC_NODE);
       break;
-    case "poly":
-      provider = new ethers.providers.WebSocketProvider(
-        process.env.POLYGON_NODE
-      );
-      break;
-    case "avax":
-      provider = new ethers.providers.WebSocketProvider(process.env.AVAX_NODE);
-      break;
-    case "ftm":
-      provider = new ethers.providers.WebSocketProvider(
-        process.env.FANTOM_NODE
-      );
-      break;
-    case "arbitrum":
-      provider = new ethers.providers.WebSocketProvider(
-        process.env.ARBITRUM_NODE
-      );
-      break;
+    // case "poly":
+    //   provider = new ethers.providers.WebSocketProvider(
+    //     process.env.POLYGON_NODE
+    //   );
+    //   break;
+    // case "avax":
+    //   provider = new ethers.providers.WebSocketProvider(process.env.AVAX_NODE);
+    //   break;
+    // case "ftm":
+    //   provider = new ethers.providers.WebSocketProvider(
+    //     process.env.FANTOM_NODE
+    //   );
+    //   break;
+    // case "arbitrum":
+    //   provider = new ethers.providers.WebSocketProvider(
+    //     process.env.ARBITRUM_NODE
+    //   );
+    //   break;
     default:
-      throw new Error(`Invalid network: ${network}`);
+      // throw new Error(`Invalid network: ${network}`);
+      return null;
   }
 
   return provider;
