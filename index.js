@@ -15,7 +15,7 @@ const connectionEmitter = new ConnectionEmitter();
 
 const connections = [];
 
-const RECENT_CAP = 20;
+const RECENT_CAP = 30;
 const recentListings = [];
 
 initListeners();
@@ -45,7 +45,7 @@ server.on("connection", (socket) => {
             connections.splice(i, 1);
             const date = new Date().toISOString().split(".")[0];
             console.log(
-              `${date} Removed socket, now ${connections.length} connections`
+              `${date} Removed socket, now ${connections.length} connections`,
             );
             // Cleanup
             clearInterval(intervalID);
@@ -76,12 +76,12 @@ function listingListener(dexId, provider) {
       const tokenContract0 = new ethers.Contract(
         tokenAddress0,
         abis.GENERIC_ERC20_ABI,
-        provider
+        provider,
       );
       const tokenContract1 = new ethers.Contract(
         tokenAddress1,
         abis.GENERIC_ERC20_ABI,
-        provider
+        provider,
       );
 
       let name0, name1;
@@ -103,7 +103,7 @@ function listingListener(dexId, provider) {
         tokenAddress0,
         tokenAddress1,
         pair,
-        "(" + name0 + " - " + name1 + ")"
+        "(" + name0 + " - " + name1 + ")",
       );
 
       const listing = {
@@ -128,7 +128,7 @@ function listingListener(dexId, provider) {
       }
 
       connections.forEach((socket) => socket.send(JSON.stringify(listing)));
-    }
+    },
   );
 }
 
@@ -158,7 +158,9 @@ function initListeners() {
   // Recover part
   connectionEmitter.on("disconnect", (network) => {
     const date = new Date().toISOString().split(".")[0];
-    console.log(`${date} ${network} WSS 'Disconnect', re-connecting in ${NODE_RECONNECT/1000}s..`);
+    console.log(
+      `${date} ${network} WSS 'Disconnect', re-connecting in ${NODE_RECONNECT / 1000}s..`,
+    );
     setTimeout(() => {
       const provider = createProvider(network);
       connectionHandler(network, provider);
@@ -191,26 +193,26 @@ function testListing() {
 }
 
 function connectionHandler(network, provider) {
-  provider._websocket.on("open", () => {
+  provider.websocket.onopen = () => {
     const date = new Date().toISOString().split(".")[0];
     console.log(`${date} ${network} WSS OPEN`);
-  });
+  };
 
-  provider._websocket.on("close", () => {
+  provider.websocket.onclose = () => {
     const date = new Date().toISOString().split(".")[0];
     console.log(`${date} ${network} WSS CLOSED`);
     connectionEmitter.emit("disconnect", network);
-  });
+  };
 }
 
 function createProvider(network) {
   let provider;
   switch (network) {
     case "eth":
-      provider = new ethers.providers.WebSocketProvider(process.env.ETH_NODE);
+      provider = new ethers.WebSocketProvider(process.env.ETH_NODE);
       break;
     case "bsc":
-      provider = new ethers.providers.WebSocketProvider(process.env.BSC_NODE);
+      provider = new ethers.WebSocketProvider(process.env.BSC_NODE);
       break;
     // case "poly":
     //   provider = new ethers.providers.WebSocketProvider(
