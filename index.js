@@ -15,7 +15,7 @@ const connectionEmitter = new ConnectionEmitter();
 
 const connections = [];
 
-const RECENT_CAP = 30;
+const RECENT_CAP = 40;
 const recentListings = [];
 
 initListeners();
@@ -135,23 +135,16 @@ function listingListener(dexId, provider) {
 function initListeners() {
   console.log("Scanning for token listings...");
   // Init part
-  const providers = {
-    eth: null,
-    bsc: null,
-    poly: null,
-    avax: null,
-    ftm: null,
-    arbitrum: null,
-  };
+  const providers = new Map();
   for (net in networkDexes) {
     for (dexId of networkDexes[net]) {
-      if (!providers[net]) {
+      if (!providers.has(net)) {
         const provider = createProvider(net);
         if (!provider) continue;
         connectionHandler(net, provider);
-        providers[net] = provider;
+        providers.set(net, provider);
       }
-      listingListener(dexId, providers[net]);
+      listingListener(dexId, providers.get(net));
     }
   }
 
@@ -214,26 +207,11 @@ function createProvider(network) {
     case "bsc":
       provider = new ethers.WebSocketProvider(process.env.BSC_NODE);
       break;
-    // case "poly":
-    //   provider = new ethers.providers.WebSocketProvider(
-    //     process.env.POLYGON_NODE
-    //   );
-    //   break;
-    // case "avax":
-    //   provider = new ethers.providers.WebSocketProvider(process.env.AVAX_NODE);
-    //   break;
-    // case "ftm":
-    //   provider = new ethers.providers.WebSocketProvider(
-    //     process.env.FANTOM_NODE
-    //   );
-    //   break;
-    // case "arbitrum":
-    //   provider = new ethers.providers.WebSocketProvider(
-    //     process.env.ARBITRUM_NODE
-    //   );
-    //   break;
+    case "avax":
+      provider = new ethers.WebSocketProvider(process.env.AVAX_NODE);
+      break;
     default:
-      // throw new Error(`Invalid network: ${network}`);
+      console.error(`Invalid network: ${network}`);
       return null;
   }
 

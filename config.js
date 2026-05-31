@@ -77,11 +77,11 @@ const dex = {
 
 const networkDexes = {
   eth: ["uniswap", "sushiswap_eth"],
-  arbitrum: ["sushiswap_arb"],
+  // arbitrum: ["sushiswap_arb"],
   bsc: ["sushiswap_bsc", "pancake", "apeswap"],
-  poly: ["quickswap", "sushiswap_poly"],
+  // poly: ["quickswap", "sushiswap_poly"],
   avax: ["trader_joe"],
-  ftm: ["spookyswap", "spiritswap", "sushiswap_ftm"],
+  // ftm: ["spookyswap", "spiritswap", "sushiswap_ftm"],
 };
 
 module.exports = {

@@ -1,0 +1,9 @@
+services:
+  degen-scan:
+    build: .
+    image: degen-scan:latest
+    container_name: degen-scan-server
+    env_file: .env
+    ports:
+      - "1001:4000"
+    restart: unless-stopped
