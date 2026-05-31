@@ -186,16 +186,16 @@ function testListing() {
 }
 
 function connectionHandler(network, provider) {
-  provider.websocket.onopen = () => {
+  provider.websocket.on("open", () => {
     const date = new Date().toISOString().split(".")[0];
     console.log(`${date} ${network} WSS OPEN`);
-  };
+  });
 
-  provider.websocket.onclose = () => {
+  provider.websocket.on("close", () => {
     const date = new Date().toISOString().split(".")[0];
     console.log(`${date} ${network} WSS CLOSED`);
     connectionEmitter.emit("disconnect", network);
-  };
+  });
 }
 
 function createProvider(network) {
